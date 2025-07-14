@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html>
 <head>
@@ -10,15 +9,26 @@
   <script>
     TrelloPowerUp.initialize({
       'card-buttons': function (t, options) {
-        return [{
-          icon: 'https://i.ibb.co/6sbknH0/logo-stroke-32pt-style-2-no-stroke.png',
-          text: 'Hello World!',
-          callback: function (t) {
-            return t.card().then(function(card) {
-              alert(`Hello world!`);
-            });
+        return [
+          {
+            icon: 'https://i.ibb.co/6sbknH0/logo-stroke-32pt-style-2-no-stroke.png',
+            text: 'Hello World!',
+            callback: function (t) {
+              return t.card().then(function(card) {
+                alert(`Hello world!`);
+              });
+            }
+          },
+          {
+            icon: 'https://i.ibb.co/6sbknH0/logo-stroke-32pt-style-2-no-stroke.png',
+            text: '▶ Start exeros-api',
+            callback: function (t) {
+              return t.card().then(function(card) {
+                alert(`Uruchomiono exeros-api dla: ${card.name}`);
+              });
+            }
           }
-        }];
+        ];
       }
     });
   </script>
