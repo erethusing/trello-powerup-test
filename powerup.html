@@ -1,28 +1,25 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <script src="https://p.trellocdn.com/power-up.min.js"></script>
-    <script>
-      var t = TrelloPowerUp.iframe();
-
-      window.TrelloPowerUp.initialize({
-        'card-buttons': function(t, options) {
-          return [{
-            icon: 'https://cdn-icons-png.flaticon.com/512/545/545705.png', // dowolna ikonka
-            text: 'Wyślij webhook',
-            callback: function(t) {
-              return fetch('https://n8n.yourdomain.com/webhook/trello-przycisk', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                  card: t.card('id', 'name'),
-                  user: t.member('username')
-                })
-              }).then(() => t.closePopup());
-            }
-          }];
-        }
-      });
-    </script>
-  </head>
+<head>
+  <meta charset="utf-8">
+  <title>Trello Power-Up</title>
+</head>
+<body>
+  <script src="https://p.trellocdn.com/power-up.min.js"></script>
+  <script>
+    TrelloPowerUp.initialize({
+      'card-buttons': function (t, options) {
+        return [{
+          icon: 'https://i.ibb.co/6sbknH0/logo-stroke-32pt-style-2-no-stroke.png',
+          text: 'Hello World!',
+          callback: function (t) {
+            return t.card().then(function(card) {
+              alert(`Hello world!`);
+            });
+          }
+        }];
+      }
+    });
+  </script>
+</body>
 </html>
