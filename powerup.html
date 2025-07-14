@@ -1,25 +1,41 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <meta charset="utf-8">
-  <title>Trello Power-Up</title>
-</head>
-<body>
-  <script src="https://p.trellocdn.com/power-up.min.js"></script>
-  <script>
-    TrelloPowerUp.initialize({
-      'card-buttons': function (t, options) {
-        return [{
-          icon: 'https://i.ibb.co/6sbknH0/logo-stroke-32pt-style-2-no-stroke.png',
-          text: 'Hello World!',
-          callback: function (t) {
-            return t.card().then(function(card) {
-              alert(`Hello world!`);
-            });
-          }
-        }];
-      }
-    });
-  </script>
-</body>
+  <head>
+    <script src="https://p.trellocdn.com/power-up.min.js"></script>
+    <script>
+      var t = TrelloPowerUp.iframe();
+
+      window.TrelloPowerUp.initialize({
+        'card-buttons': function(t, options) {
+          const buttons = [
+            { text: '▶ Start exeros-api', webhook: 'exeros-api' },
+            { text: '▶ Start exeros-panel', webhook: 'exeros-panel' },
+            { text: '▶ Start exeros-api-caching-proxy', webhook: 'exeros-api-caching-proxy' },
+            { text: '▶ Start exeros-web-companion', webhook: 'exeros-web-companion' }
+          ];
+
+          return buttons.map(btn => ({
+            icon: 'https://cdn-icons-png.flaticon.com/512/545/545705.png',
+            text: btn.text,
+            callback: function(t) {
+              return Promise.all([
+                t.card('id', 'name'),
+                t.member('username')
+              ]).then(([card, user]) => {
+                return fetch('https://n8n.yourdomain.com/webhook/trello-przycisk', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    action: btn.webhook,
+                    card,
+                    user
+                  })
+                });
+              }).then(() => t.closePopup());
+            }
+          }));
+        }
+      });
+    </script>
+  </head>
 </html>
