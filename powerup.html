@@ -12,82 +12,20 @@
         return [
           {
             icon: 'https://i.ibb.co/6sbknH0/logo-stroke-32pt-style-2-no-stroke.png',
+            text: 'Hello World!',
+            callback: function (t) {
+              return t.card().then(function(card) {
+                alert(`Hello world!`);
+              });
+            }
+          },
+          {
+            icon: 'https://i.ibb.co/6sbknH0/logo-stroke-32pt-style-2-no-stroke.png',
             text: '▶ Start exeros-api',
             callback: function (t) {
-              return Promise.all([
-                t.card('id', 'name'),
-                t.member('username')
-              ]).then(([card, user]) => {
-                return fetch('https://n8n.yourdomain.com/webhook/trello-przycisk', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({
-                    action: 'exeros-api',
-                    card,
-                    user
-                  })
-                });
-              }).then(() => t.closePopup());
-            }
-          },
-          {
-            icon: 'https://i.ibb.co/6sbknH0/logo-stroke-32pt-style-2-no-stroke.png',
-            text: '▶ Start exeros-panel',
-            callback: function (t) {
-              return Promise.all([
-                t.card('id', 'name'),
-                t.member('username')
-              ]).then(([card, user]) => {
-                return fetch('https://n8n.yourdomain.com/webhook/trello-przycisk', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({
-                    action: 'exeros-panel',
-                    card,
-                    user
-                  })
-                });
-              }).then(() => t.closePopup());
-            }
-          },
-          {
-            icon: 'https://i.ibb.co/6sbknH0/logo-stroke-32pt-style-2-no-stroke.png',
-            text: '▶ Start exeros-api-caching-proxy',
-            callback: function (t) {
-              return Promise.all([
-                t.card('id', 'name'),
-                t.member('username')
-              ]).then(([card, user]) => {
-                return fetch('https://n8n.yourdomain.com/webhook/trello-przycisk', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({
-                    action: 'exeros-api-caching-proxy',
-                    card,
-                    user
-                  })
-                });
-              }).then(() => t.closePopup());
-            }
-          },
-          {
-            icon: 'https://i.ibb.co/6sbknH0/logo-stroke-32pt-style-2-no-stroke.png',
-            text: '▶ Start exeros-web-companion',
-            callback: function (t) {
-              return Promise.all([
-                t.card('id', 'name'),
-                t.member('username')
-              ]).then(([card, user]) => {
-                return fetch('https://n8n.yourdomain.com/webhook/trello-przycisk', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({
-                    action: 'exeros-web-companion',
-                    card,
-                    user
-                  })
-                });
-              }).then(() => t.closePopup());
+              return t.card().then(function(card) {
+                alert(`Uruchomiono exeros-api dla: ${card.name}`);
+              });
             }
           }
         ];
