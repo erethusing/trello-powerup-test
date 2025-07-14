@@ -2,34 +2,27 @@
 <html>
   <head>
     <script src="https://p.trellocdn.com/power-up.min.js"></script>
-    <meta charset="utf-8" />
-    <title>Trello Power-Up</title>
-  </head>
-  <body>
     <script>
+      var t = TrelloPowerUp.iframe();
+
       window.TrelloPowerUp.initialize({
         'card-buttons': function(t, options) {
           return [{
-            icon: 'https://cdn-icons-png.flaticon.com/512/545/545705.png',
+            icon: 'https://cdn-icons-png.flaticon.com/512/545/545705.png', // dowolna ikonka
             text: 'Wyślij webhook',
             callback: function(t) {
-              return t.card('id', 'name').then(function(card) {
-                return fetch('https://hookbin.com/YOUR-TEST-URL', {
-                  method: 'POST',
-                  headers: {
-                    'Content-Type': 'application/json'
-                  },
-                  body: JSON.stringify({
-                    cardId: card.id,
-                    cardName: card.name,
-                    timestamp: new Date().toISOString()
-                  })
-                });
+              return fetch('https://n8n.yourdomain.com/webhook/trello-przycisk', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  card: t.card('id', 'name'),
+                  user: t.member('username')
+                })
               }).then(() => t.closePopup());
             }
           }];
         }
       });
     </script>
-  </body>
+  </head>
 </html>
