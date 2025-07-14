@@ -1,12 +1,14 @@
 <!DOCTYPE html>
 <html>
   <head>
+    <meta charset="utf-8">
+    <title>Trello Power-Up</title>
+  </head>
+  <body>
     <script src="https://p.trellocdn.com/power-up.min.js"></script>
     <script>
-      var t = TrelloPowerUp.iframe();
-
-      window.TrelloPowerUp.initialize({
-        'card-buttons': function(t, options) {
+      TrelloPowerUp.initialize({
+        'card-buttons': function (t, options) {
           const buttons = [
             { text: '▶ Start exeros-api', webhook: 'exeros-api' },
             { text: '▶ Start exeros-panel', webhook: 'exeros-panel' },
@@ -37,5 +39,5 @@
         }
       });
     </script>
-  </head>
+  </body>
 </html>
