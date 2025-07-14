@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html>
 <head>
@@ -10,15 +9,33 @@
   <script>
     TrelloPowerUp.initialize({
       'card-buttons': function (t, options) {
-        return [{
+        const buttons = [
+          { text: '▶ Start exeros-api', webhook: 'exeros-api' },
+          { text: '▶ Start exeros-panel', webhook: 'exeros-panel' },
+          { text: '▶ Start exeros-api-caching-proxy', webhook: 'exeros-api-caching-proxy' },
+          { text: '▶ Start exeros-web-companion', webhook: 'exeros-web-companion' }
+        ];
+
+        return buttons.map(btn => ({
           icon: 'https://i.ibb.co/6sbknH0/logo-stroke-32pt-style-2-no-stroke.png',
-          text: 'Hello World!',
+          text: btn.text,
           callback: function (t) {
-            return t.card().then(function(card) {
-              alert(`Hello world!`);
-            });
+            return Promise.all([
+              t.card('id', 'name'),
+              t.member('username')
+            ]).then(([card, user]) => {
+              return fetch('https://n8n.yourdomain.com/webhook/trello-przycisk', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  action: btn.webhook,
+                  card,
+                  user
+                })
+              });
+            }).then(() => t.closePopup());
           }
-        }];
+        }));
       }
     });
   </script>
