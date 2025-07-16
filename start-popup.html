@@ -13,15 +13,27 @@
       padding: 10px;
       width: 100%;
     }
+    #buttons {
+      display: none;
+    }
   </style>
 
-  <button onclick="startAction('exeros-api')">▶ Start exeros-api</button>
-  <button onclick="startAction('exeros-panel')">▶ Start exeros-panel</button>
-  <button onclick="startAction('exeros-api-caching-proxy')">▶ Start exeros-api-caching-proxy</button>
-  <button onclick="startAction('exeros-web-companion')">▶ Start exeros-web-companion</button>
+  <button id="start-main">🚀 Start Workflow</button>
+
+  <div id="buttons">
+    <button onclick="startAction('exeros-api')">▶ Start exeros-api</button>
+    <button onclick="startAction('exeros-panel')">▶ Start exeros-panel</button>
+    <button onclick="startAction('exeros-api-caching-proxy')">▶ Start exeros-api-caching-proxy</button>
+    <button onclick="startAction('exeros-web-companion')">▶ Start exeros-web-companion</button>
+  </div>
 
   <script>
     const t = TrelloPowerUp.iframe();
+
+    document.getElementById('start-main').addEventListener('click', function () {
+      document.getElementById('buttons').style.display = 'block';
+      this.style.display = 'none';
+    });
 
     function startAction(actionName) {
       Promise.all([
@@ -39,9 +51,10 @@
           })
         });
       }).then(() => {
-        t.closeModal(); // closes iframe popup
+        t.closeModal();
       });
     }
   </script>
 </body>
+
 </html>
