@@ -2,14 +2,15 @@
 <html>
 <head>
   <meta charset="utf-8" />
-  <title>Select Start Action</title>
-</head>
-<body>
-  <script src="https://p.trellocdn.com/power-up.min.js"></script>
+  <title>Start Workflow Popup</title>
   <style>
+    body {
+      font-family: sans-serif;
+      padding: 10px;
+    }
     button {
       display: block;
-      margin: 8px 0;
+      margin: 6px 0;
       padding: 10px;
       width: 100%;
     }
@@ -17,11 +18,14 @@
       display: none;
     }
   </style>
+</head>
+<body>
+  <script src="https://p.trellocdn.com/power-up.min.js"></script>
 
   <button id="start-main">🚀 Start Workflow</button>
 
   <div id="buttons">
-    <button onclick="startAction('testexeros-api')">▶ Start exeros-api</button>
+    <button onclick="startAction('exeros-api')">▶ Start exeros-api</button>
     <button onclick="startAction('exeros-panel')">▶ Start exeros-panel</button>
     <button onclick="startAction('exeros-api-caching-proxy')">▶ Start exeros-api-caching-proxy</button>
     <button onclick="startAction('exeros-web-companion')">▶ Start exeros-web-companion</button>
@@ -33,6 +37,9 @@
     document.getElementById('start-main').addEventListener('click', function () {
       document.getElementById('buttons').style.display = 'block';
       this.style.display = 'none';
+
+      // ✅ Resize the iframe to fit the full button area (200px)
+      t.sizeTo(200).done();
     });
 
     function startAction(actionName) {
@@ -54,7 +61,9 @@
         t.closeModal();
       });
     }
+
+    // Optional: Ensure proper initial size (in case it loads strangely)
+    t.sizeTo(50).done();
   </script>
 </body>
-
 </html>
