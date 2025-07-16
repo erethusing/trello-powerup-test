@@ -16,6 +16,9 @@
     #buttons {
       display: none;
     }
+    #back {
+      display: none;
+    }
   </style>
 </head>
 <body>
@@ -28,30 +31,29 @@
     <button onclick="startAction('exeros-panel')">▶ Start exeros-panel</button>
     <button onclick="startAction('exeros-api-caching-proxy')">▶ Start exeros-api-caching-proxy</button>
     <button onclick="startAction('exeros-web-companion')">▶ Start exeros-web-companion</button>
-    <button id="back">← Wróć</button>
   </div>
 
-  
+  <button id="back">← Wróć</button>
+
   <script>
     const t = TrelloPowerUp.iframe();
 
     document.getElementById('start-main').addEventListener('click', function () {
       document.getElementById('buttons').style.display = 'block';
+      document.getElementById('back').style.display = 'block';
       this.style.display = 'none';
 
-      // ✅ Resize the iframe to fit the full button area (200px)
       t.sizeTo(200).done();
-      
     });
-     document.getElementById('back').addEventListener('click', function () {
+
+    document.getElementById('back').addEventListener('click', function () {
       document.getElementById('buttons').style.display = 'none';
-      document.getElementById('back').style.display = 'none';
+      this.style.display = 'none';
       document.getElementById('start-main').style.display = 'block';
 
-      t.sizeTo(50).done(); // zmniejsz iframe
+      t.sizeTo(50).done();
     });
 
-    
     function startAction(actionName) {
       Promise.all([
         t.card('id', 'name', 'shortLink'),
@@ -72,8 +74,7 @@
       });
     }
 
-    // Optional: Ensure proper initial size (in case it loads strangely)
-    t.sizeTo(50).done();
+    t.sizeTo(50).done(); // initial size
   </script>
 </body>
 </html>
