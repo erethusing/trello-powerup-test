@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Select Start Action</title>
+</head>
+<body>
+  <script src="https://p.trellocdn.com/power-up.min.js"></script>
+  <style>
+    button {
+      display: block;
+      margin: 8px 0;
+      padding: 10px;
+      width: 100%;
+    }
+  </style>
+
+  <button onclick="startAction('exeros-api')">▶ Start exeros-api</button>
+  <button onclick="startAction('exeros-panel')">▶ Start exeros-panel</button>
+  <button onclick="startAction('exeros-api-caching-proxy')">▶ Start exeros-api-caching-proxy</button>
+  <button onclick="startAction('exeros-web-companion')">▶ Start exeros-web-companion</button>
+
+  <script>
+    const t = TrelloPowerUp.iframe();
+
+    function startAction(actionName) {
+      Promise.all([
+        t.card('id', 'name', 'shortLink'),
+        t.member('username')
+      ]).then(([card, user]) => {
+        return fetch('https://n8n.yourdomain.com/webhook/trello-przycisk', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: actionName,
+            card: card,
+            user: user,
+            timestamp: new Date().toISOString()
+          })
+        });
+      }).then(() => {
+        t.closeModal(); // closes iframe popup
+      });
+    }
+  </script>
+</body>
+</html>
