@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Trello Power-Up - 4 Start Buttons</title>
+</head>
+<body>
+  <script src="https://p.trellocdn.com/power-up.min.js"></script>
+  <script>
+    TrelloPowerUp.initialize({
+      'card-buttons': function (t, options) {
+        return [
+          {
+            icon: 'https://cdn-icons-png.flaticon.com/512/545/545705.png',
+            text: '▶ Start exeros-api',
+            callback: function (t) {
+              return sendWebhook(t, 'exeros-api');
+            }
+          },
+          {
+            icon: 'https://cdn-icons-png.flaticon.com/512/545/545705.png',
+            text: '▶ Start exeros-panel',
+            callback: function (t) {
+              return sendWebhook(t, 'exeros-panel');
+            }
+          },
+          {
+            icon: 'https://cdn-icons-png.flaticon.com/512/545/545705.png',
+            text: '▶ Start exeros-api-caching-proxy',
+            callback: function (t) {
+              return sendWebhook(t, 'exeros-api-caching-proxy');
+            }
+          },
+          {
+            icon: 'https://cdn-icons-png.flaticon.com/512/545/545705.png',
+            text: '▶ Start exeros-web-companion',
+            callback: function (t) {
+              return sendWebhook(t, 'exeros-web-companion');
+            }
+          }
+        ];
+
+        function sendWebhook(t, actionName) {
+          // Pobierz kartę i użytkownika
+          return Promise.all([
+            t.card('id', 'name', 'shortLink'),
+            t.member('username')
+          ]).then(([card, user]) => {
+            // Wywołaj webhook n8n
+            return fetch('https://n8n.yourdomain.com/webhook/trello-przycisk', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                action: actionName,
+                card: card,
+                user: user,
+                timestamp: new Date().toISOString()
+              })
+            });
+          }).then(() => t.closePopup());
+        }
+      }
+    });
+  </script>
+</body>
+</html>
