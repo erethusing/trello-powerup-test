@@ -53,24 +53,56 @@
     });
 
     function startAction(actionName) {
-      Promise.all([
+    Promise.all([
         t.card('id', 'name', 'shortLink'),
+        t.get('card', 'shared', 'PU_ANY_FIELDS-badges'),
         t.member('username')
-      ]).then(([card, user]) => {
-        return fetch('https://n8n.yourdomain.com/webhook/trello-przycisk', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            action: actionName,
-            card: card,
-            user: user,
-            timestamp: new Date().toISOString()
-          })
-        });
-      }).then(() => {
+    ]).then(([card, badges, user]) => {
+        const startedAtFieldId = 9761; // <- to musisz ustawić zgodnie z Any Fields
+        const now = new Date().toISOString();
+
+        const existing = (badges || []).find(b => b.f === startedAtFieldId);
+
+        // jeśli jeszcze nie ustawione, zapisujemy datę
+        if (!existing) {
+            const newBadges = [...(badges || []), {
+                f: startedAtFieldId,
+                v: now
+            }];
+
+            return t.set('card', 'shared', {
+                'PU_ANY_FIELDS-badges': newBadges
+            }).then(() => {
+                // po ustawieniu wartości wysyłamy webhook
+                return fetch('https://n8n.cosmicweb.cloud/webhook-test/trello-button', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: actionName,
+                        card: card,
+                        user: user,
+                        timestamp: now
+                    })
+                });
+            });
+        } else {
+            // pole już istnieje – tylko webhook
+            return fetch('https://n8n.cosmicweb.cloud/webhook-test/trello-button', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    action: actionName,
+                    card: card,
+                    user: user,
+                    timestamp: now
+                })
+            });
+        }
+    }).then(() => {
         t.closeModal();
-      });
-    }
+    });
+}
+
 
     t.sizeTo(50).done(); // initial size
   </script>
