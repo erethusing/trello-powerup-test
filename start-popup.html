@@ -57,75 +57,43 @@
 </div>
 
 <script>
-    const t = TrelloPowerUp.iframe();
+   const t = TrelloPowerUp.iframe();
 
-    document.getElementById('start-main').addEventListener('click', function () {
-        document.getElementById('buttons').style.display = 'block';
-        document.getElementById('back').style.display = 'block';
-        this.style.display = 'none';
-
-        t.sizeTo(350).done();
+function loadDetails() {
+  // Pobierz zapisane dane z karty (z storage Power-Upa)
+  t.get('card', 'shared', 'taskDetails')
+    .then(data => {
+      if (data) {
+        document.getElementById('task-desc').value = data.description || '';
+        document.getElementById('start-date').value = data.start_date || '';
+      }
     });
+}
 
-    document.getElementById('back').addEventListener('click', function () {
-        document.getElementById('buttons').style.display = 'none';
-        this.style.display = 'none';
-        document.getElementById('start-main').style.display = 'block';
+document.getElementById('submit-details').addEventListener('click', function () {
+  const opis = document.getElementById('task-desc').value;
+  const data = document.getElementById('start-date').value;
 
-        t.sizeTo(250).done();
-    });
+  if (!opis || !data) {
+    alert('Uzupełnij oba pola.');
+    return;
+  }
 
-    function startAction(actionName) {
-        Promise.all([
-            t.card('id', 'name', 'shortLink'),
-            t.member('username')
-        ]).then(([card, user]) => {
-            return fetch('https://n8n.cosmicweb.cloud/webhook-test/trello-button', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    action: actionName,
-                    card: card,
-                    user: user,
-                    timestamp: new Date().toISOString()
-                })
-            });
-        }).then(() => {
-            t.closeModal();
-        });
-    }
+  // Zapisz w storage Power-Upa przypisanym do karty
+  t.set('card', 'shared', 'taskDetails', {
+    description: opis,
+    start_date: data
+  }).then(() => {
+    alert('Dane zostały zapisane lokalnie w Power-Upie.');
+  });
+});
 
-    document.getElementById('submit-details').addEventListener('click', function () {
-        const opis = document.getElementById('task-desc').value;
-        const data = document.getElementById('start-date').value;
+// Załaduj dane przy starcie iframe
+loadDetails();
 
-        if (!opis || !data) {
-            alert('Uzupełnij oba pola.');
-            return;
-        }
+// Rozmiar iframe
+t.sizeTo(250).done();
 
-        Promise.all([
-            t.card('id', 'name', 'shortLink'),
-            t.member('username')
-        ]).then(([card, user]) => {
-            return fetch('https://n8n.cosmicweb.cloud/webhook-test/trello-button', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    action: 'manual-details',
-                    card: card,
-                    user: user,
-                    description: opis,
-                    start_date: data,
-                    timestamp: new Date().toISOString()
-                })
-            });
-        }).then(() => {
-            alert('Dane zostały zapisane.');
-        });
-    });
-
-    t.sizeTo(250).done(); // initial size to fit everything
 </script>
 </body>
 </html>
