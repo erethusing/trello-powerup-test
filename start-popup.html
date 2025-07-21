@@ -23,7 +23,7 @@
 </head>
 <body>
 
-<label for="duration">⏱ Czas trwania (h):</label>
+<label for="duration">⏱ Czas ccctrwania (h):</label>
 <input type="number" id="duration" />
 
 <label for="description">📝 Opis zadania:</label>
@@ -35,7 +35,7 @@
 <script>
   const t = TrelloPowerUp.iframe();
 
-  // Wczytaj dane z karty (private do karty i użytkownika lub shared)
+  // Wczytaj dane z Power-Upa (z karty)
   t.get('card', 'shared', 'customData').then(data => {
     if (data) {
       document.getElementById('duration').value = data.duration || '';
@@ -43,7 +43,7 @@
     }
   });
 
-  function saveAndSend() {
+  function saveOnlyLocally() {
     const duration = document.getElementById('duration').value;
     const description = document.getElementById('description').value;
 
@@ -53,32 +53,14 @@
       updatedAt: new Date().toISOString()
     };
 
-    // Zapisz lokalnie w Trello Power-Upie (na karcie)
     t.set('card', 'shared', { customData }).then(() => {
       document.getElementById('status').textContent = "💾 Zapisano";
-
-      // Wyślij do n8n
-      Promise.all([
-        t.card('id', 'name', 'shortLink'),
-        t.member('username')
-      ]).then(([card, user]) => {
-        return fetch('https://n8n.cosmicweb.cloud/webhook-test/trello-button', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            card,
-            user,
-            timestamp: new Date().toISOString(),
-            ...customData
-          })
-        });
-      });
     });
   }
 
-  // Obsługa autozapisu
-  document.getElementById('duration').addEventListener('change', saveAndSend);
-  document.getElementById('description').addEventListener('change', saveAndSend);
+  // Zapisuj przy każdej zmianie
+  document.getElementById('duration').addEventListener('change', saveOnlyLocally);
+  document.getElementById('description').addEventListener('change', saveOnlyLocally);
 
   t.sizeTo(document.body).done();
 </script>
