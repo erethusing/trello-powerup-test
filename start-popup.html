@@ -1,84 +1,86 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="utf-8" />
-    <title>Start Workflow Popup</title>
-    <style>
-        body {
-            font-family: sans-serif;
-            padding: 10px;
-        }
-        form {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-        label {
-            font-weight: bold;
-        }
-        input, textarea {
-            padding: 5px;
-            font-size: 14px;
-        }
-        button {
-            padding: 8px;
-            font-size: 16px;
-            background-color: #0079bf;
-            color: white;
-            border: none;
-            cursor: pointer;
-        }
-        button:hover {
-            background-color: #005f8d;
-        }
-    </style>
+  <meta charset="utf-8">
+  <title>Szczegóły zadania</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 10px;
+    }
+    label {
+      font-weight: bold;
+      margin-top: 10px;
+      display: block;
+    }
+    input, textarea {
+      width: 100%;
+      padding: 5px;
+      font-size: 14px;
+      margin-bottom: 10px;
+    }
+  </style>
 </head>
 <body>
 
-<form id="custom-form">
-    <label for="duration">⏱ Czas trwania (h):</label>
-    <input type="number" name="duration" id="duration" required>
+<label for="duration">⏱ Czas trwania (h):</label>
+<input type="number" id="duration" />
 
-    <label for="description">📝 Opis zadania:</label>
-    <textarea name="description" id="description" rows="3" required></textarea>
+<label for="description">📝 Opis zadania:</label>
+<textarea id="description" rows="3"></textarea>
 
-    <button type="submit">🚀 Start i wyślij</button>
-</form>
+<p style="color:green;" id="status"></p>
 
 <script src="https://p.trellocdn.com/power-up.min.js"></script>
 <script>
-    const t = TrelloPowerUp.iframe();
+  const t = TrelloPowerUp.iframe();
 
-    document.getElementById('custom-form').addEventListener('submit', function (e) {
-        e.preventDefault();
+  // Wczytaj dane z karty (private do karty i użytkownika lub shared)
+  t.get('card', 'shared', 'customData').then(data => {
+    if (data) {
+      document.getElementById('duration').value = data.duration || '';
+      document.getElementById('description').value = data.description || '';
+    }
+  });
 
-        const formData = new FormData(e.target);
-        const duration = formData.get('duration');
-        const description = formData.get('description');
+  function saveAndSend() {
+    const duration = document.getElementById('duration').value;
+    const description = document.getElementById('description').value;
 
-        Promise.all([
-            t.card('id', 'name', 'shortLink'),
-            t.member('username')
-        ]).then(([card, user]) => {
-            return fetch('https://n8n.cosmicweb.cloud/webhook-test/trello-button', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    action: 'custom',
-                    card,
-                    user,
-                    timestamp: new Date().toISOString(),
-                    duration,
-                    description
-                })
-            });
-        }).then(() => {
-            t.closeModal();
+    const customData = {
+      duration,
+      description,
+      updatedAt: new Date().toISOString()
+    };
+
+    // Zapisz lokalnie w Trello Power-Upie (na karcie)
+    t.set('card', 'shared', { customData }).then(() => {
+      document.getElementById('status').textContent = "💾 Zapisano";
+
+      // Wyślij do n8n
+      Promise.all([
+        t.card('id', 'name', 'shortLink'),
+        t.member('username')
+      ]).then(([card, user]) => {
+        return fetch('https://n8n.cosmicweb.cloud/webhook-test/trello-button', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            card,
+            user,
+            timestamp: new Date().toISOString(),
+            ...customData
+          })
         });
+      });
     });
+  }
 
-    t.sizeTo('#custom-form').done();
+  // Obsługa autozapisu
+  document.getElementById('duration').addEventListener('change', saveAndSend);
+  document.getElementById('description').addEventListener('change', saveAndSend);
+
+  t.sizeTo(document.body).done();
 </script>
-
 </body>
 </html>
