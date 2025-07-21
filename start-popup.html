@@ -1,1 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Start Workflow Popup</title>
+    <style>
+        body {
+            font-family: sans-serif;
+        }
+        button {
+            display: block;
+            margin-bottom: 2px;
+            padding-bottom: 4px;
+            width: 100%;
+        }
+        #buttons {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+<script src="https://p.trellocdn.com/power-up.min.js"></script>
 
+<button id="start-main">🚀 Ssstart Workflow</button>
+
+<div id="buttons">
+    <button onclick="startAction('exeros-api')">▶ Start exeros-api</button>
+    <button onclick="startAction('exeros-panel')">▶ Start exeros-panel</button>
+    <button onclick="startAction('exeros-api-caching-proxy')">▶ Start exeros-api-caching-proxy</button>
+    <button onclick="startAction('exeros-web-companion')">▶ Start exeros-web-companion</button>
+    <button id="back">← Wróć</button>
+</div>
+
+
+
+<script>
+    const t = TrelloPowerUp.iframe();
+
+    document.getElementById('start-main').addEventListener('click', function () {
+        document.getElementById('buttons').style.display = 'block';
+        document.getElementById('back').style.display = 'block';
+        this.style.display = 'none';
+
+        t.sizeTo(200).done();
+    });
+
+    document.getElementById('back').addEventListener('click', function () {
+        document.getElementById('buttons').style.display = 'none';
+        this.style.display = 'none';
+        document.getElementById('start-main').style.display = 'block';
+
+        t.sizeTo(250).done();
+    });
+
+    function startAction(actionName) {
+        Promise.all([
+            t.card('id', 'name', 'shortLink'),
+            t.member('username')
+        ]).then(([card, user]) => {
+            return fetch('https://n8n.cosmicweb.cloud/webhook-test/trello-button', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    action: actionName,
+                    card: card,
+                    user: user,
+                    timestamp: new Date().toISOString()
+                })
+            });
+        }).then(() => {
+            t.closeModal();
+        });
+    }
+
+    t.sizeTo(250).done(); // initial size
+</script>
+</body>
+</html>
