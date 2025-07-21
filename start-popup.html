@@ -31,6 +31,9 @@
             width: 100%;
             margin-bottom: 8px;
         }
+        #back {
+            display: none; /* ukryty na start */
+        }
     </style>
 </head>
 <body>
@@ -57,43 +60,87 @@
 </div>
 
 <script>
-   const t = TrelloPowerUp.iframe();
+    const t = TrelloPowerUp.iframe();
 
-function loadDetails() {
-  // Pobierz zapisane dane z karty (z storage Power-Upa)
-  t.get('card', 'shared', 'taskDetails')
-    .then(data => {
-      if (data) {
-        document.getElementById('task-desc').value = data.description || '';
-        document.getElementById('start-date').value = data.start_date || '';
-      }
+    // Funkcja ładująca dane z storage
+    function loadDetails() {
+        t.get('card', 'shared', 'taskDetails')
+            .then(data => {
+                if (data) {
+                    document.getElementById('task-desc').value = data.description || '';
+                    document.getElementById('start-date').value = data.start_date || '';
+                }
+            });
+    }
+
+    // Obsługa zapisu danych formularza
+    document.getElementById('submit-details').addEventListener('click', function () {
+        const opis = document.getElementById('task-desc').value;
+        const data = document.getElementById('start-date').value;
+
+        if (!opis || !data) {
+            alert('Uzupełnij oba pola.');
+            return;
+        }
+
+        t.set('card', 'shared', 'taskDetails', {
+            description: opis,
+            start_date: data
+        }).then(() => {
+            alert('Dane zostały zapisane lokalnie w Power-Upie.');
+        });
     });
-}
 
-document.getElementById('submit-details').addEventListener('click', function () {
-  const opis = document.getElementById('task-desc').value;
-  const data = document.getElementById('start-date').value;
+    // Pokazywanie przycisków startowych po kliknięciu "Start Workflow"
+    document.getElementById('start-main').addEventListener('click', function () {
+        document.getElementById('buttons').style.display = 'block';
+        document.getElementById('back').style.display = 'block';
+        this.style.display = 'none';
 
-  if (!opis || !data) {
-    alert('Uzupełnij oba pola.');
-    return;
-  }
+        // Opcjonalnie ukryć formularz jeśli chcesz
+        // document.getElementById('form-section').style.display = 'none';
 
-  // Zapisz w storage Power-Upa przypisanym do karty
-  t.set('card', 'shared', 'taskDetails', {
-    description: opis,
-    start_date: data
-  }).then(() => {
-    alert('Dane zostały zapisane lokalnie w Power-Upie.');
-  });
-});
+        t.sizeTo(300).done(); // dopasuj wysokość iframe do nowego widoku
+    });
 
-// Załaduj dane przy starcie iframe
-loadDetails();
+    // Obsługa przycisku "Wróć"
+    document.getElementById('back').addEventListener('click', function () {
+        document.getElementById('buttons').style.display = 'none';
+        this.style.display = 'none';
+        document.getElementById('start-main').style.display = 'block';
 
-// Rozmiar iframe
-t.sizeTo(250).done();
+        // Pokaż formularz (jeśli ukrywałeś)
+        // document.getElementById('form-section').style.display = 'block';
 
+        t.sizeTo(250).done(); // przywróć rozmiar iframe do oryginalnego (formularz)
+    });
+
+    // Funkcja wysyłająca dane po kliknięciu jednego z 4 startowych przycisków
+    function startAction(actionName) {
+        Promise.all([
+            t.card('id', 'name', 'shortLink'),
+            t.member('username')
+        ]).then(([card, user]) => {
+            return fetch('https://n8n.cosmicweb.cloud/webhook-test/trello-button', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    action: actionName,
+                    card: card,
+                    user: user,
+                    timestamp: new Date().toISOString()
+                })
+            });
+        }).then(() => {
+            t.closeModal();
+        });
+    }
+
+    // Załaduj dane przy starcie iframe
+    loadDetails();
+
+    // Ustaw początkowy rozmiar iframe
+    t.sizeTo(250).done();
 </script>
 </body>
 </html>
