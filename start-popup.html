@@ -21,7 +21,7 @@
 <body>
   <script src="https://p.trellocdn.com/power-up.min.js"></script>
 
-  <button id="start-main">🚀 grrStart Workflow</button>
+  <button id="start-main">🚀 g21414114rrStart Workflow</button>
 
   <div id="buttons">
     <button onclick="startAction('exeros-api')">▶ Start exeros-api</button>
@@ -53,22 +53,39 @@
       t.sizeTo(50).done();
     });
 
+    // Funkcja do autoryzacji (jeśli token jest już w pamięci, zwraca go)
+    async function authorize() {
+      let token = await t.get('member', 'private', 'token');
+      if (!token) {
+        token = await new Promise((resolve, reject) => {
+          t.authorize({
+            type: 'popup',
+            name: 'Webhook Test',
+            scope: { read: true, write: true },
+            expiration: 'never',
+            success() {
+              // Po autoryzacji token jest dostępny pod t.authorizedToken
+              resolve(t.authorizedToken);
+            },
+            error(err) {
+              reject(err);
+            }
+          });
+        });
+        await t.set('member', 'private', 'token', token);
+      }
+      return token;
+    }
+
     async function startAction(actionName) {
       try {
-        // 1. Autoryzuj użytkownika do REST API Trello (jeśli trzeba)
-        await t.getRestApi().authorize();
+        const token = await authorize();
 
-        // 2. Pobierz token użytkownika
-        const token = await t.getRestApi().getToken();
-
-        // 3. Pobierz ID karty i jej pole 'start'
         const card = await t.card('id', 'start');
 
         if (!card.start) {
-          // Data w formacie ISO, który Trello przyjmuje
           const nowISO = new Date().toISOString();
 
-          // 4. Wywołaj REST API do aktualizacji pola start
           const url = `https://api.trello.com/1/cards/${card.id}?key=${API_KEY}&token=${token}`;
 
           await fetch(url, {
@@ -83,13 +100,14 @@
         }
 
         t.closePopup();
+
       } catch (error) {
         console.error(error);
         alert('Błąd: ' + error.message);
       }
     }
 
-    t.sizeTo(50).done(); // initial size
+    t.sizeTo(50).done();
   </script>
 </body>
 </html>
