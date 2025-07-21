@@ -48,45 +48,23 @@
       t.sizeTo(50).done();
     });
 
-    function formatDateTime(date) {
-      const pad = (n) => n.toString().padStart(2, '0');
-      const yyyy = date.getFullYear();
-      const mm = pad(date.getMonth() + 1);
-      const dd = pad(date.getDate());
-      const hh = pad(date.getHours());
-      const mi = pad(date.getMinutes());
-      const ss = pad(date.getSeconds());
-      return `${yyyy}-${mm}-${dd} ${hh}:${mi}:${ss}`;
-    }
-
     function startAction(actionName) {
-      Promise.all([
-        t.card('id', 'name', 'shortLink'),
-        t.get('card', 'shared', 'PU_ANY_FIELDS-badges')
-      ]).then(([card, badges]) => {
-        const startedAtFieldId = 9761;
-        const now = formatDateTime(new Date());
-
-        const existing = (badges || []).find(b => b.f === startedAtFieldId);
-
-        if (!existing) {
-          const newBadges = [...(badges || []), {
-            f: startedAtFieldId,
-            v: now
-          }];
-
-          return t.set('card', 'shared', {
-            'PU_ANY_FIELDS-badges': newBadges
-          });
-        }
-
-        return Promise.resolve(); // nic nie zmieniamy
-      }).then(() => {
-        t.closeModal();
-      });
+      t.card('id', 'start')
+        .then(card => {
+          if (!card.start) {
+            const nowISO = new Date().toISOString();
+            return t.set('card', 'shared', {}).then(() => {
+              return t.set('card', 'start', nowISO);
+            });
+          }
+          return Promise.resolve(); // już ustawione, nic nie robimy
+        })
+        .then(() => {
+          t.closeModal();
+        });
     }
 
-    t.sizeTo(50).done();
+    t.sizeTo(50).done(); // initial size
   </script>
 </body>
 </html>
