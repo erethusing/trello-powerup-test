@@ -32,10 +32,12 @@
   </div>
 
   <script>
+    const API_KEY = '8fbb128ac8c2a9b7f99ebd43303d735c';
+
     const t = TrelloPowerUp.iframe({
-  appKey: '8fbb128ac8c2a9b7f99ebd43303d735c',
-  appName: 'Webhook Test'
-});
+      appKey: API_KEY,
+      appName: 'Webhook Test'
+    });
 
     document.getElementById('start-main').addEventListener('click', function () {
       document.getElementById('buttons').style.display = 'block';
@@ -51,28 +53,41 @@
       t.sizeTo(50).done();
     });
 
-   function startAction(actionName) {
-  Promise.all([
-    t.card('id', 'start'),
-    t.getRestApi().getToken(), // pobierz token użytkownika
-    t.getRestApi().getKey()    // pobierz key Power-Upa
-  ])
-  .then(([card, token, key]) => {
-    if (!card.start) {
-      const nowISO = new Date().toISOString();
-      const url = `https://api.trello.com/1/cards/${card.id}?key=${key}&token=${token}`;
-      return fetch(url, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ start: nowISO })
-      });
+    async function startAction(actionName) {
+      try {
+        // 1. Autoryzuj użytkownika do REST API Trello (jeśli trzeba)
+        await t.getRestApi().authorize();
+
+        // 2. Pobierz token użytkownika
+        const token = await t.getRestApi().getToken();
+
+        // 3. Pobierz ID karty i jej pole 'start'
+        const card = await t.card('id', 'start');
+
+        if (!card.start) {
+          // Data w formacie ISO, który Trello przyjmuje
+          const nowISO = new Date().toISOString();
+
+          // 4. Wywołaj REST API do aktualizacji pola start
+          const url = `https://api.trello.com/1/cards/${card.id}?key=${API_KEY}&token=${token}`;
+
+          await fetch(url, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ start: nowISO })
+          });
+
+          alert(`Data startu ustawiona na: ${nowISO}`);
+        } else {
+          alert(`Data startu już jest ustawiona: ${card.start}`);
+        }
+
+        t.closePopup();
+      } catch (error) {
+        console.error(error);
+        alert('Błąd: ' + error.message);
+      }
     }
-    return Promise.resolve(); // nic nie zmieniamy
-  })
-  .then(() => {
-    t.closeModal();
-  });
-}
 
     t.sizeTo(50).done(); // initial size
   </script>
