@@ -7,31 +7,19 @@
 <body>
 <script src="https://p.trellocdn.com/power-up.min.js"></script>
 <script>
- TrelloPowerUp.initialize({
-  'card-back-section': function (t, options) {
-    return [
-      {
-        title: 'Start Work',
-        icon: 'https://cdn-icons-png.flaticon.com/512/545/545705.png',
-        content: {
-          type: 'iframe',
-          url: t.signUrl('./task-details.html'),
-          height: 50
+    TrelloPowerUp.initialize({
+        'card-back-section': function (t, options) {
+            return {
+                title: 'SStart WorkflowW',
+                icon: 'https://cdn-icons-png.flaticon.com/512/545/545705.png',
+                content: {
+                    type: 'iframe',
+                    url: t.signUrl('./start-popup'),
+                    height: 50
+                }
+            };
         }
-      },
-      {
-        title: 'Szczegóły zadania',
-        icon: 'https://cdn-icons-png.flaticon.com/512/545/545705.png',
-        content: {
-          type: 'iframe',
-          url: t.signUrl('./start-popup.html'),
-          height: 100
-        }
-      }
-    ];
-  }
-});
-
+    });
 </script>
 </body>
 </html>
