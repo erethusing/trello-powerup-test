@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Szczegóły zadania</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 10px;
+    }
+    label {
+      font-weight: bold;
+      margin-top: 10px;
+      display: block;
+    }
+    input, textarea {
+      width: 100%;
+      padding: 5px;
+      font-size: 14px;
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+
+<label for="duration">⏱ Czas ccctrwania (h):</label>
+<input type="number" id="duration" />
+
+<label for="description">📝 Opis zadania:</label>
+<textarea id="description" rows="3"></textarea>
+
+<p style="color:green;" id="status"></p>
+
+<script src="https://p.trellocdn.com/power-up.min.js"></script>
+<script>
+  const t = TrelloPowerUp.iframe();
+
+  // Wczytaj dane z Power-Upa (z karty)
+  t.get('card', 'shared', 'customData').then(data => {
+    if (data) {
+      document.getElementById('duration').value = data.duration || '';
+      document.getElementById('description').value = data.description || '';
+    }
+  });
+
+  function saveOnlyLocally() {
+    const duration = document.getElementById('duration').value;
+    const description = document.getElementById('description').value;
+
+    const customData = {
+      duration,
+      description,
+      updatedAt: new Date().toISOString()
+    };
+
+    t.set('card', 'shared', { customData }).then(() => {
+      document.getElementById('status').textContent = "💾 Zapisano";
+    });
+  }
+
+  // Zapisuj przy każdej zmianie
+  document.getElementById('duration').addEventListener('change', saveOnlyLocally);
+  document.getElementById('description').addEventListener('change', saveOnlyLocally);
+
+  t.sizeTo(document.body).done();
+</script>
+</body>
+</html>
