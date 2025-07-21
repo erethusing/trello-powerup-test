@@ -2,43 +2,37 @@
 <html>
 <head>
   <meta charset="utf-8" />
-  <title>Trello Power-Up - 4 Start Buttons</title>
+  <title>Trello Power-Up</title>
 </head>
 <body>
-  <script src="https://p.trellocdn.com/power-up.min.js"></script>
-  <script>
- TrelloPowerUp.initialize({
+<script src="https://p.trellocdn.com/power-up.min.js"></script>
+<script>
+  TrelloPowerUp.initialize({
 
-    'card-buttons': function (t, options) {
+    'card-back-section': function (t, options) {
       return [
         {
+          title: 'Start Workflow',
           icon: 'https://cdn-icons-png.flaticon.com/512/545/545705.png',
-          text: 'Szczegóły zadania',
-          callback: function (t) {
-            return t.modal({
-              url: './task-details.html',
-              fullscreen: false,
-              height: 100,
-              title: 'Szczegóły zadania'
-            });
+          content: {
+            type: 'iframe',
+            url: t.signUrl('./start-popup.html'),
+            height: 50
           }
         },
         {
+          title: 'Szczegóły zadania',
           icon: 'https://cdn-icons-png.flaticon.com/512/545/545705.png',
-          text: 'Start Workflow',
-          callback: function (t) {
-            return t.modal({
-              url: './start-popup.html',
-              fullscreen: false,
-              height: 100,
-              title: 'Start Workflow'
-            });
+          content: {
+            type: 'iframe',
+            url: t.signUrl('./task-details.html'),
+            height: 150
           }
         }
       ];
     }
 
   });
-  </script>
+</script>
 </body>
 </html>
