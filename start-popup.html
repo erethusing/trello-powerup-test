@@ -28,10 +28,8 @@
     <button onclick="startAction('exeros-panel')">▶ Start exeros-panel</button>
     <button onclick="startAction('exeros-api-caching-proxy')">▶ Start exeros-api-caching-proxy</button>
     <button onclick="startAction('exeros-web-companion')">▶ Start exeros-web-companion</button>
-     <button id="back">← Wróć</button>
+    <button id="back">← Wróć</button>
   </div>
-
- 
 
   <script>
     const t = TrelloPowerUp.iframe();
@@ -40,7 +38,6 @@
       document.getElementById('buttons').style.display = 'block';
       document.getElementById('back').style.display = 'block';
       this.style.display = 'none';
-
       t.sizeTo(200).done();
     });
 
@@ -48,63 +45,48 @@
       document.getElementById('buttons').style.display = 'none';
       this.style.display = 'none';
       document.getElementById('start-main').style.display = 'block';
-
       t.sizeTo(50).done();
     });
 
+    function formatDateTime(date) {
+      const pad = (n) => n.toString().padStart(2, '0');
+      const yyyy = date.getFullYear();
+      const mm = pad(date.getMonth() + 1);
+      const dd = pad(date.getDate());
+      const hh = pad(date.getHours());
+      const mi = pad(date.getMinutes());
+      const ss = pad(date.getSeconds());
+      return `${yyyy}-${mm}-${dd} ${hh}:${mi}:${ss}`;
+    }
+
     function startAction(actionName) {
-    Promise.all([
+      Promise.all([
         t.card('id', 'name', 'shortLink'),
-        t.get('card', 'shared', 'PU_ANY_FIELDS-badges'),
-        t.member('username')
-    ]).then(([card, badges, user]) => {
-        const startedAtFieldId = 9761; // <- to musisz ustawić zgodnie z Any Fields
-        const now = new Date().toISOString();
+        t.get('card', 'shared', 'PU_ANY_FIELDS-badges')
+      ]).then(([card, badges]) => {
+        const startedAtFieldId = 9761;
+        const now = formatDateTime(new Date());
 
         const existing = (badges || []).find(b => b.f === startedAtFieldId);
 
-        // jeśli jeszcze nie ustawione, zapisujemy datę
         if (!existing) {
-            const newBadges = [...(badges || []), {
-                f: startedAtFieldId,
-                v: now
-            }];
+          const newBadges = [...(badges || []), {
+            f: startedAtFieldId,
+            v: now
+          }];
 
-            return t.set('card', 'shared', {
-                'PU_ANY_FIELDS-badges': newBadges
-            }).then(() => {
-                // po ustawieniu wartości wysyłamy webhook
-                return fetch('https://n8n.cosmicweb.cloud/webhook-test/trello-button', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        action: actionName,
-                        card: card,
-                        user: user,
-                        timestamp: now
-                    })
-                });
-            });
-        } else {
-            // pole już istnieje – tylko webhook
-            return fetch('https://n8n.cosmicweb.cloud/webhook-test/trello-button', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    action: actionName,
-                    card: card,
-                    user: user,
-                    timestamp: now
-                })
-            });
+          return t.set('card', 'shared', {
+            'PU_ANY_FIELDS-badges': newBadges
+          });
         }
-    }).then(() => {
+
+        return Promise.resolve(); // nic nie zmieniamy
+      }).then(() => {
         t.closeModal();
-    });
-}
+      });
+    }
 
-
-    t.sizeTo(50).done(); // initial size
+    t.sizeTo(50).done();
   </script>
 </body>
 </html>
