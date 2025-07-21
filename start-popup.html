@@ -21,7 +21,7 @@
 <body>
   <script src="https://p.trellocdn.com/power-up.min.js"></script>
 
-  <button id="start-main">🚀 xxxSSStart Workflow</button>
+  <button id="start-main">🚀 grrStart Workflow</button>
 
   <div id="buttons">
     <button onclick="startAction('exeros-api')">▶ Start exeros-api</button>
@@ -32,7 +32,10 @@
   </div>
 
   <script>
-    const t = TrelloPowerUp.iframe();
+    const t = TrelloPowerUp.iframe({
+  appKey: '8fbb128ac8c2a9b7f99ebd43303d735c',
+  appName: 'Webhook Test'
+});
 
     document.getElementById('start-main').addEventListener('click', function () {
       document.getElementById('buttons').style.display = 'block';
