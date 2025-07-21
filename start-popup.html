@@ -21,7 +21,7 @@
 <body>
   <script src="https://p.trellocdn.com/power-up.min.js"></script>
 
-  <button id="start-main">🚀 SSStart Workflow</button>
+  <button id="start-main">🚀 xxxSSStart Workflow</button>
 
   <div id="buttons">
     <button onclick="startAction('exeros-api')">▶ Start exeros-api</button>
@@ -48,21 +48,28 @@
       t.sizeTo(50).done();
     });
 
-    function startAction(actionName) {
-      t.card('id', 'start')
-        .then(card => {
-          if (!card.start) {
-            const nowISO = new Date().toISOString();
-            return t.set('card', 'shared', {}).then(() => {
-              return t.set('card', 'start', nowISO);
-            });
-          }
-          return Promise.resolve(); // już ustawione, nic nie robimy
-        })
-        .then(() => {
-          t.closeModal();
-        });
+   function startAction(actionName) {
+  Promise.all([
+    t.card('id', 'start'),
+    t.getRestApi().getToken(), // pobierz token użytkownika
+    t.getRestApi().getKey()    // pobierz key Power-Upa
+  ])
+  .then(([card, token, key]) => {
+    if (!card.start) {
+      const nowISO = new Date().toISOString();
+      const url = `https://api.trello.com/1/cards/${card.id}?key=${key}&token=${token}`;
+      return fetch(url, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ start: nowISO })
+      });
     }
+    return Promise.resolve(); // nic nie zmieniamy
+  })
+  .then(() => {
+    t.closeModal();
+  });
+}
 
     t.sizeTo(50).done(); // initial size
   </script>
