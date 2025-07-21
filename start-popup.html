@@ -6,22 +6,37 @@
     <style>
         body {
             font-family: sans-serif;
+            padding: 10px;
         }
         button {
             display: block;
-            margin-bottom: 2px;
-            padding-bottom: 4px;
+            margin-bottom: 6px;
+            padding: 6px;
             width: 100%;
         }
         #buttons {
             display: none;
+        }
+        #form-section {
+            margin-top: 10px;
+            border-top: 1px solid #ccc;
+            padding-top: 10px;
+        }
+        label {
+            display: block;
+            margin-bottom: 4px;
+            font-weight: bold;
+        }
+        input, textarea {
+            width: 100%;
+            margin-bottom: 8px;
         }
     </style>
 </head>
 <body>
 <script src="https://p.trellocdn.com/power-up.min.js"></script>
 
-<button id="start-main">🚀 Ssstart Workflow</button>
+<button id="start-main">🚀 Start Workflow</button>
 
 <div id="buttons">
     <button onclick="startAction('exeros-api')">▶ Start exeros-api</button>
@@ -31,7 +46,15 @@
     <button id="back">← Wróć</button>
 </div>
 
+<div id="form-section">
+    <label for="task-desc">Opis zadania:</label>
+    <textarea id="task-desc" rows="3" placeholder="Wpisz opis..."></textarea>
 
+    <label for="start-date">Data rozpoczęcia:</label>
+    <input type="datetime-local" id="start-date" />
+
+    <button id="submit-details">💾 Zatwierdź dane</button>
+</div>
 
 <script>
     const t = TrelloPowerUp.iframe();
@@ -41,7 +64,7 @@
         document.getElementById('back').style.display = 'block';
         this.style.display = 'none';
 
-        t.sizeTo(200).done();
+        t.sizeTo(350).done();
     });
 
     document.getElementById('back').addEventListener('click', function () {
@@ -72,7 +95,37 @@
         });
     }
 
-    t.sizeTo(250).done(); // initial size
+    document.getElementById('submit-details').addEventListener('click', function () {
+        const opis = document.getElementById('task-desc').value;
+        const data = document.getElementById('start-date').value;
+
+        if (!opis || !data) {
+            alert('Uzupełnij oba pola.');
+            return;
+        }
+
+        Promise.all([
+            t.card('id', 'name', 'shortLink'),
+            t.member('username')
+        ]).then(([card, user]) => {
+            return fetch('https://n8n.cosmicweb.cloud/webhook-test/trello-button', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    action: 'manual-details',
+                    card: card,
+                    user: user,
+                    description: opis,
+                    start_date: data,
+                    timestamp: new Date().toISOString()
+                })
+            });
+        }).then(() => {
+            alert('Dane zostały zapisane.');
+        });
+    });
+
+    t.sizeTo(250).done(); // initial size to fit everything
 </script>
 </body>
 </html>
