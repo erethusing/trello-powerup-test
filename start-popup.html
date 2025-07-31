@@ -8,7 +8,7 @@
 <body>
   <h3>1️⃣ Wybierz projekty do zapisania:</h3>
   <div id="checkboxes">
-    <label><input type="checkbox" value="projekt1"> projekt1</label><br>
+    <label><input type="checkbox" value="projekt1"> projekt13</label><br>
     <label><input type="checkbox" value="projekt2"> projekt2</label><br>
     <label><input type="checkbox" value="projekt3"> projekt3</label><br>
   </div>
@@ -28,22 +28,27 @@
     const select = document.getElementById('projectSelect');
 
     saveBtn.addEventListener('click', () => {
-      const selected = Array.from(
-        document.querySelectorAll('#checkboxes input[type="checkbox"]:checked')
-      ).map(cb => cb.value);
+  const selected = Array.from(
+    document.querySelectorAll('#checkboxes input[type="checkbox"]:checked')
+  ).map(cb => cb.value);
 
-      if (selected.length === 0) {
-        alert('Zaznacz chociaż jeden projekt');
-        return;
-      }
+  if (selected.length === 0) {
+    alert('Zaznacz chociaż jeden projekt');
+    return;
+  }
 
-      // Zapisz do t.set
-      t.set('card', 'shared', 'selectedProjects', selected)
-        .then(() => {
-          alert('Zapisano!');
-          updateDropdown(selected);
-        });
+  // Krok 1: Pobierz poprzednie dane z t.set
+  t.get('card', 'shared', 'selectedProjects')
+    .then(existing => {
+      const combined = [...new Set([...(existing || []), ...selected])]; // połączenie + unikalność
+      return t.set('card', 'shared', 'selectedProjects', combined).then(() => combined);
+    })
+    .then(finalList => {
+      alert('Dodano projekty do listy!');
+      updateDropdown(finalList); // odśwież dropdown
     });
+});
+
 
     function updateDropdown(projectList) {
       select.innerHTML = '';
