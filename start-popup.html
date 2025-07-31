@@ -6,53 +6,52 @@
   <script src="https://p.trellocdn.com/power-up.min.js"></script>
 </head>
 <body>
-  <h3>Wybierz projekty:</h3>
+  <h3>1️⃣ Wybierz projekty do zapisania:</h3>
   <div id="checkboxes">
     <label><input type="checkbox" value="projekt1"> projekt1</label><br>
     <label><input type="checkbox" value="projekt2"> projekt2</label><br>
     <label><input type="checkbox" value="projekt3"> projekt3</label><br>
   </div>
-  <button id="save">💾 Zapisz do t.set()</button>
+  <button id="save">💾 Zapisz wybrane do t.set()</button>
 
   <hr>
 
-  <h3>Projekty z t.set:</h3>
+  <h3>2️⃣ Wybierz projekt z zapisanych:</h3>
   <select id="projectSelect">
-    <option>-- Wczytywanie... --</option>
+    <option>-- Brak danych --</option>
   </select>
 
   <script>
     const t = TrelloPowerUp.iframe();
 
-    const checkboxContainer = document.getElementById('checkboxes');
     const saveBtn = document.getElementById('save');
     const select = document.getElementById('projectSelect');
 
-    // Funkcja zapisu zaznaczonych projektów do t.set
     saveBtn.addEventListener('click', () => {
-      const checkboxes = checkboxContainer.querySelectorAll('input[type="checkbox"]:checked');
-      const selected = Array.from(checkboxes).map(cb => cb.value);
+      const selected = Array.from(
+        document.querySelectorAll('#checkboxes input[type="checkbox"]:checked')
+      ).map(cb => cb.value);
 
       if (selected.length === 0) {
-        alert('Wybierz co najmniej jeden projekt!');
+        alert('Zaznacz chociaż jeden projekt');
         return;
       }
 
+      // Zapisz do t.set
       t.set('card', 'shared', 'selectedProjects', selected)
         .then(() => {
-          alert('Zapisano do t.set!');
+          alert('Zapisano!');
           updateDropdown(selected);
         });
     });
 
-    // Funkcja ładowania zapisanych projektów i aktualizacji dropdowna
     function updateDropdown(projectList) {
       select.innerHTML = '';
 
       if (!projectList || projectList.length === 0) {
-        const opt = document.createElement('option');
-        opt.textContent = '-- Brak zapisanych projektów --';
-        select.appendChild(opt);
+        const empty = document.createElement('option');
+        empty.textContent = '-- Brak zapisanych projektów --';
+        select.appendChild(empty);
         return;
       }
 
@@ -62,18 +61,18 @@
       defaultOpt.selected = true;
       select.appendChild(defaultOpt);
 
-      projectList.forEach(project => {
+      projectList.forEach(p => {
         const opt = document.createElement('option');
-        opt.value = project;
-        opt.textContent = project;
+        opt.value = p;
+        opt.textContent = p;
         select.appendChild(opt);
       });
     }
 
-    // Przy starcie iframe pobierz dane z t.set
+    // Wczytaj przy starcie
     t.get('card', 'shared', 'selectedProjects')
-      .then(savedProjects => {
-        updateDropdown(savedProjects || []);
+      .then(projects => {
+        updateDropdown(projects || []);
       });
   </script>
 </body>
