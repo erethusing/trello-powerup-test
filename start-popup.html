@@ -1,146 +1,80 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="utf-8" />
-    <title>Start Workflow Popup</title>
-    <style>
-        body {
-            font-family: sans-serif;
-            padding: 10px;
-        }
-        button {
-            display: block;
-            margin-bottom: 6px;
-            padding: 6px;
-            width: 100%;
-        }
-        #buttons {
-            display: none;
-        }
-        #form-section {
-            margin-top: 10px;
-            border-top: 1px solid #ccc;
-            padding-top: 10px;
-        }
-        label {
-            display: block;
-            margin-bottom: 4px;
-            font-weight: bold;
-        }
-        input, textarea {
-            width: 100%;
-            margin-bottom: 8px;
-        }
-        #back {
-            display: none; /* ukryty na start */
-        }
-    </style>
+  <meta charset="UTF-8">
+  <title>Test Power-Up</title>
+  <script src="https://p.trellocdn.com/power-up.min.js"></script>
 </head>
 <body>
-<script src="https://p.trellocdn.com/power-up.min.js"></script>
+  <h3>Wybierz projekty:</h3>
+  <div id="checkboxes">
+    <label><input type="checkbox" value="projekt1"> projekt1</label><br>
+    <label><input type="checkbox" value="projekt2"> projekt2</label><br>
+    <label><input type="checkbox" value="projekt3"> projekt3</label><br>
+  </div>
+  <button id="save">💾 Zapisz do t.set()</button>
 
-<button id="start-main">🚀 Start Workflow</button>
+  <hr>
 
-<div id="buttons">
-    <button onclick="startAction('exeros-api')">▶ Start exeros-api</button>
-    <button onclick="startAction('exeros-panel')">▶ Start exeros-panel</button>
-    <button onclick="startAction('exeros-api-caching-proxy')">▶ Start exeros-api-caching-proxy</button>
-    <button onclick="startAction('exeros-web-companion')">▶ Start exeros-web-companion</button>
-    <button id="back">← Wróć</button>
-</div>
+  <h3>Projekty z t.set:</h3>
+  <select id="projectSelect">
+    <option>-- Wczytywanie... --</option>
+  </select>
 
-<div id="form-section">
-    <label for="task-desc">Opis zadania:</label>
-    <textarea id="task-desc" rows="3" placeholder="Wpisz opis..."></textarea>
-
-    <label for="start-date">Data rozpoczęcia:</label>
-    <input type="datetime-local" id="start-date" />
-
-    <button id="submit-details">💾 Zatwierdź dane</button>
-</div>
-
-<script>
+  <script>
     const t = TrelloPowerUp.iframe();
 
-    // Funkcja ładująca dane z storage
-    function loadDetails() {
-        t.get('card', 'shared', 'taskDetails')
-            .then(data => {
-                if (data) {
-                    document.getElementById('task-desc').value = data.description || '';
-                    document.getElementById('start-date').value = data.start_date || '';
-                }
-            });
-    }
+    const checkboxContainer = document.getElementById('checkboxes');
+    const saveBtn = document.getElementById('save');
+    const select = document.getElementById('projectSelect');
 
-    // Obsługa zapisu danych formularza
-    document.getElementById('submit-details').addEventListener('click', function () {
-        const opis = document.getElementById('task-desc').value;
-        const data = document.getElementById('start-date').value;
+    // Funkcja zapisu zaznaczonych projektów do t.set
+    saveBtn.addEventListener('click', () => {
+      const checkboxes = checkboxContainer.querySelectorAll('input[type="checkbox"]:checked');
+      const selected = Array.from(checkboxes).map(cb => cb.value);
 
-        if (!opis || !data) {
-            alert('Uzupełnij oba pola.');
-            return;
-        }
+      if (selected.length === 0) {
+        alert('Wybierz co najmniej jeden projekt!');
+        return;
+      }
 
-        t.set('card', 'shared', 'taskDetails', {
-            description: opis,
-            start_date: data
-        }).then(() => {
-            alert('Dane zostały zapisane lokalnie w Power-Upie.');
+      t.set('card', 'shared', 'selectedProjects', selected)
+        .then(() => {
+          alert('Zapisano do t.set!');
+          updateDropdown(selected);
         });
     });
 
-    // Pokazywanie przycisków startowych po kliknięciu "Start Workflow"
-    document.getElementById('start-main').addEventListener('click', function () {
-        document.getElementById('buttons').style.display = 'block';
-        document.getElementById('back').style.display = 'block';
-        this.style.display = 'none';
+    // Funkcja ładowania zapisanych projektów i aktualizacji dropdowna
+    function updateDropdown(projectList) {
+      select.innerHTML = '';
 
-        // Opcjonalnie ukryć formularz jeśli chcesz
-        // document.getElementById('form-section').style.display = 'none';
+      if (!projectList || projectList.length === 0) {
+        const opt = document.createElement('option');
+        opt.textContent = '-- Brak zapisanych projektów --';
+        select.appendChild(opt);
+        return;
+      }
 
-        t.sizeTo(300).done(); // dopasuj wysokość iframe do nowego widoku
-    });
+      const defaultOpt = document.createElement('option');
+      defaultOpt.textContent = '-- Wybierz projekt --';
+      defaultOpt.disabled = true;
+      defaultOpt.selected = true;
+      select.appendChild(defaultOpt);
 
-    // Obsługa przycisku "Wróć"
-    document.getElementById('back').addEventListener('click', function () {
-        document.getElementById('buttons').style.display = 'none';
-        this.style.display = 'none';
-        document.getElementById('start-main').style.display = 'block';
-
-        // Pokaż formularz (jeśli ukrywałeś)
-        // document.getElementById('form-section').style.display = 'block';
-
-        t.sizeTo(250).done(); // przywróć rozmiar iframe do oryginalnego (formularz)
-    });
-
-    // Funkcja wysyłająca dane po kliknięciu jednego z 4 startowych przycisków
-    function startAction(actionName) {
-        Promise.all([
-            t.card('id', 'name', 'shortLink'),
-            t.member('username')
-        ]).then(([card, user]) => {
-            return fetch('https://n8n.cosmicweb.cloud/webhook-test/trello-button', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    action: actionName,
-                    card: card,
-                    user: user,
-                    timestamp: new Date().toISOString()
-                })
-            });
-        }).then(() => {
-            t.closeModal();
-        });
+      projectList.forEach(project => {
+        const opt = document.createElement('option');
+        opt.value = project;
+        opt.textContent = project;
+        select.appendChild(opt);
+      });
     }
 
-    // Załaduj dane przy starcie iframe
-    loadDetails();
-
-    // Ustaw początkowy rozmiar iframe
-    t.sizeTo(250).done();
-</script>
+    // Przy starcie iframe pobierz dane z t.set
+    t.get('card', 'shared', 'selectedProjects')
+      .then(savedProjects => {
+        updateDropdown(savedProjects || []);
+      });
+  </script>
 </body>
 </html>
